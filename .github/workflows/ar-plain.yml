@@ -5,28 +5,25 @@ jobs:
   plain:
     runs-on: ubuntu-latest
     steps:
-      - name: record
+      - name: definition marker
         run: |
-          echo "AR-PLAIN-ATTEMPT=${{ github.run_attempt }}"
-          echo "PLAIN_PINNED_GITHUB_SHA=$GITHUB_SHA"
-          echo "PLAIN_EVENT_HEAD_SHA=${{ github.event.pull_request.head.sha }}"
-      - name: resolve at job time
-        run: |
-          mkdir w && cd w && git init -q
-          git remote add origin "https://github.com/${{ github.repository }}.git"
-          git fetch -q --depth=1 origin "refs/pull/${{ github.event.pull_request.number }}/head"
-          git checkout -q FETCH_HEAD
-          echo "PLAIN_FETCHED_SHA=$(git rev-parse HEAD)"
-      - name: build the artifact from the resolved tree
+          echo "DEFN_VERSION=1-APPROVED"
+          echo "DEFN_ATTEMPT=${{ github.run_attempt }}"
+          echo "DEFN_PINNED_GITHUB_SHA=$GITHUB_SHA"
+          echo "DEFN_EVENT_HEAD_SHA=${{ github.event.pull_request.head.sha }}"
+      - name: checkout at the pinned merge commit, no job-time fetch
+        uses: actions/checkout@v4
+      - name: build the artifact from the checked-out tree
         run: |
           mkdir -p out
-          cp w/ci/report.sh out/report.sh
-          echo "PLAIN_ARTIFACT_SHA=$(cd w && git rev-parse HEAD)"
+          cp ci/report.sh out/report.sh
+          echo "DEFN_ARTIFACT_SHA=$(git rev-parse HEAD)"
       - name: upload
         uses: actions/upload-artifact@v4
         with:
           name: build-output
           path: out/
+      - name: ordinary slow build step
+        run: sleep 70
       - name: fail so the retry rule matches
-        working-directory: w
-        run: bash ci/run.sh
+        run: exit 1
