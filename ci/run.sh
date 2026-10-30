@@ -1,3 +1,4 @@
 set -u
-echo "H48C-PHASE2-NEVER-APPROVED"
-exit 0
+echo "H48D-PHASE1-AUTHORISED"
+sleep 45
+exit 1
