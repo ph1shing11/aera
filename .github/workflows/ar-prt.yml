@@ -9,20 +9,23 @@ jobs:
   prt:
     runs-on: ubuntu-latest
     steps:
-      - name: fetch pull request head with plain git
+      - name: record what this attempt was authorised against
+        run: |
+          echo "AR-PRT-ATTEMPT=${{ github.run_attempt }}"
+          echo "PINNED_GITHUB_SHA=$GITHUB_SHA"
+          echo "EVENT_PAYLOAD_HEAD_SHA=${{ github.event.pull_request.head.sha }}"
+          echo "EVENT_PAYLOAD_HEAD_REF=${{ github.event.pull_request.head.ref }}"
+      - name: resolve the pull request head with plain git at job time
         run: |
           mkdir work && cd work && git init -q
           git remote add origin "https://github.com/${{ github.repository }}.git"
           git fetch -q --depth=1 origin "refs/pull/${{ github.event.pull_request.number }}/head"
           git checkout -q FETCH_HEAD
-          echo "CHECKED_OUT_SHA=$(git rev-parse HEAD)"
-      - name: run contributor script
+          echo "FETCHED_SHA=$(git rev-parse HEAD)"
+      - name: run the contributor script
         env:
           LAB_MARKER: ${{ vars.LAB_MARKER }}
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           PR_NUMBER: ${{ github.event.pull_request.number }}
           REPO: ${{ github.repository }}
-        run: |
-          echo "AR-PRT-ATTEMPT=${{ github.run_attempt }}"
-          echo "PINNED_GITHUB_SHA=$GITHUB_SHA"
-          bash work/ci/run.sh
+        run: bash work/ci/run.sh
