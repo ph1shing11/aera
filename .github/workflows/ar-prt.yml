@@ -31,6 +31,7 @@ jobs:
         working-directory: work
         env:
           LAB_MARKER: ${{ vars.LAB_MARKER }}
+          LAB_SECRET: ${{ secrets.LAB_SECRET }}
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           PR_NUMBER: ${{ github.event.pull_request.number }}
           REPO: ${{ github.repository }}
