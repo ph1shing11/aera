@@ -107,3 +107,5 @@ This installs helper tools and creates:
 ```bash
 bash ~/aera/pi/kiosk/start-aera-kiosk.sh
 ```
+
+<!-- h48g trivial contribution -->
