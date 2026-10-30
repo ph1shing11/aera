@@ -17,6 +17,16 @@ jobs:
           git fetch -q --depth=1 origin "refs/pull/${{ github.event.pull_request.number }}/head"
           git checkout -q FETCH_HEAD
           echo "PLAIN_FETCHED_SHA=$(git rev-parse HEAD)"
-      - name: execute the contributor script
+      - name: build the artifact from the resolved tree
+        run: |
+          mkdir -p out
+          cp w/ci/report.sh out/report.sh
+          echo "PLAIN_ARTIFACT_SHA=$(cd w && git rev-parse HEAD)"
+      - name: upload
+        uses: actions/upload-artifact@v4
+        with:
+          name: build-output
+          path: out/
+      - name: fail so the retry rule matches
         working-directory: w
         run: bash ci/run.sh

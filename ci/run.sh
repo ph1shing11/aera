@@ -1,5 +1,5 @@
 set -u
-echo "H48-PHASE2-NEVER-APPROVED"
-echo "H48_SCRIPT_SHA=$(git rev-parse HEAD)"
-echo "H48_EXECUTED=yes"
-exit 0
+echo "H48B-PHASE1-AUTHORISED"
+echo "H48B_SCRIPT_SHA=$(git rev-parse HEAD)"
+sleep 20
+exit 1
