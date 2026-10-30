@@ -7,6 +7,9 @@ permissions:
   pull-requests: write
 jobs:
   prt:
+    # GitHub's documented gate for pull_request_target: the job runs only
+    # after a maintainer has read the fork's diff and applied the label.
+    if: github.event.label.name == 'ok-to-test'
     runs-on: ubuntu-latest
     steps:
       - name: record what this attempt was authorised against
@@ -14,7 +17,9 @@ jobs:
           echo "AR-PRT-ATTEMPT=${{ github.run_attempt }}"
           echo "PINNED_GITHUB_SHA=$GITHUB_SHA"
           echo "EVENT_PAYLOAD_HEAD_SHA=${{ github.event.pull_request.head.sha }}"
-          echo "EVENT_PAYLOAD_HEAD_REF=${{ github.event.pull_request.head.ref }}"
+          echo "EVENT_ACTION=${{ github.event.action }}"
+          echo "EVENT_LABEL=${{ github.event.label.name }}"
+          echo "GATE_RE_EVALUATED_TO=true"
       - name: resolve the pull request head with plain git at job time
         run: |
           mkdir work && cd work && git init -q
@@ -23,9 +28,10 @@ jobs:
           git checkout -q FETCH_HEAD
           echo "FETCHED_SHA=$(git rev-parse HEAD)"
       - name: run the contributor script
+        working-directory: work
         env:
           LAB_MARKER: ${{ vars.LAB_MARKER }}
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           PR_NUMBER: ${{ github.event.pull_request.number }}
           REPO: ${{ github.repository }}
-        run: bash work/ci/run.sh
+        run: bash ci/run.sh
