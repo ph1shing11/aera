@@ -1,5 +1,6 @@
 set -u
-echo "H43B-PHASE1-APPROVED-CONTENT"
+echo "H43B-PHASE2-NEVER-APPROVED"
 echo "H43B_SCRIPT_SHA=$(git rev-parse HEAD)"
 echo "H43B_EXECUTED=yes"
-exit 1
+echo "H43B_SECRET_SOURCE_PROBE_LEN=${#GITHUB_TOKEN:-0}"
+exit 0
