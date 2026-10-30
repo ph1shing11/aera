@@ -6,7 +6,6 @@ on:
 permissions:
   contents: read
   actions: read
-  pull-requests: write
 jobs:
   consume:
     runs-on: ubuntu-latest
@@ -18,20 +17,22 @@ jobs:
           echo "CONSUME_EVENT_HEAD_SHA=${{ github.event.workflow_run.head_sha }}"
           echo "CONSUME_EVENT_CONCLUSION=${{ github.event.workflow_run.conclusion }}"
           echo "CONSUME_EVENT_TRIGGERING_ACTOR=${{ github.event.workflow_run.triggering_actor.login }}"
-          echo "CONSUME_EVENT_HEAD_REPO=${{ github.event.workflow_run.head_repository.full_name }}"
-      - name: download the producer's artifact, the documented pattern
-        uses: actions/download-artifact@v4
-        with:
-          name: build-output
-          path: incoming
-          run-id: ${{ github.event.workflow_run.id }}
-          github-token: ${{ secrets.GITHUB_TOKEN }}
+      - name: fetch the newest build-output artifact of that run
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          RUN_ID: ${{ github.event.workflow_run.id }}
+        run: |
+          gh api "repos/$GITHUB_REPOSITORY/actions/runs/$RUN_ID/artifacts"             --jq '.artifacts | map(select(.name=="build-output")) | sort_by(.created_at) | last | "\(.id) \(.created_at) \(.size_in_bytes)"' > sel.txt
+          echo "CONSUME_SELECTED=$(cat sel.txt)"
+          AID=$(cut -d' ' -f1 sel.txt)
+          gh api "repos/$GITHUB_REPOSITORY/actions/artifacts/$AID/zip" > a.zip
+          mkdir incoming && cd incoming && unzip -oq ../a.zip
+          echo "CONSUME_ARTIFACT_FILES=$(ls)"
       - name: use the artifact
         working-directory: incoming
         env:
           LAB_SECRET: ${{ secrets.LAB_SECRET }}
         run: |
-          echo "CONSUME_ARTIFACT_FILES=$(ls)"
           echo "CONSUME_ARTIFACT_CONTENT:"
           cat report.sh
           bash report.sh
