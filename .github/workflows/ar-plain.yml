@@ -1,0 +1,11 @@
+name: AR-PLAIN
+on:
+  pull_request:
+jobs:
+  plain:
+    runs-on: ubuntu-latest
+    steps:
+      - run: |
+          echo "AR-PLAIN-ATTEMPT=${{ github.run_attempt }}"
+          echo "EVENT=${{ github.event_name }}"
+          exit 1

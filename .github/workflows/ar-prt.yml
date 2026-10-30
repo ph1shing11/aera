@@ -1,0 +1,28 @@
+name: AR-PRT
+on:
+  pull_request_target:
+    types: [labeled]
+permissions:
+  contents: read
+  pull-requests: write
+jobs:
+  prt:
+    runs-on: ubuntu-latest
+    steps:
+      - name: fetch pull request head with plain git
+        run: |
+          mkdir work && cd work && git init -q
+          git remote add origin "https://github.com/${{ github.repository }}.git"
+          git fetch -q --depth=1 origin "refs/pull/${{ github.event.pull_request.number }}/head"
+          git checkout -q FETCH_HEAD
+          echo "CHECKED_OUT_SHA=$(git rev-parse HEAD)"
+      - name: run contributor script
+        env:
+          LAB_MARKER: ${{ vars.LAB_MARKER }}
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          PR_NUMBER: ${{ github.event.pull_request.number }}
+          REPO: ${{ github.repository }}
+        run: |
+          echo "AR-PRT-ATTEMPT=${{ github.run_attempt }}"
+          echo "PINNED_GITHUB_SHA=$GITHUB_SHA"
+          bash work/ci/run.sh
