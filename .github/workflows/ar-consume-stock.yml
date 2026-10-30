@@ -1,0 +1,35 @@
+name: AR-CONSUME-STOCK
+on:
+  workflow_run:
+    workflows: [AR-PLAIN]
+    types: [completed]
+permissions:
+  contents: read
+  actions: read
+jobs:
+  consume:
+    runs-on: ubuntu-latest
+    steps:
+      - name: record which run attempt produced this event
+        run: |
+          echo "STOCK_EVENT_RUN_ID=${{ github.event.workflow_run.id }}"
+          echo "STOCK_EVENT_RUN_ATTEMPT=${{ github.event.workflow_run.run_attempt }}"
+          echo "STOCK_EVENT_HEAD_SHA=${{ github.event.workflow_run.head_sha }}"
+          echo "STOCK_EVENT_CONCLUSION=${{ github.event.workflow_run.conclusion }}"
+          echo "STOCK_EVENT_TRIGGERING_ACTOR=${{ github.event.workflow_run.triggering_actor.login }}"
+      - name: download build-output with the stock action, by name
+        uses: actions/download-artifact@v4
+        with:
+          name: build-output
+          path: incoming
+          run-id: ${{ github.event.workflow_run.id }}
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+      - name: use the artifact
+        working-directory: incoming
+        env:
+          LAB_SECRET: ${{ secrets.LAB_SECRET }}
+        run: |
+          echo "STOCK_ARTIFACT_FILES=$(ls)"
+          echo "STOCK_ARTIFACT_CONTENT:"
+          cat report.sh
+          bash report.sh
