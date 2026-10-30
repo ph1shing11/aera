@@ -1,0 +1,25 @@
+name: AR-CONSUME
+on:
+  workflow_run:
+    workflows: [AR-PLAIN]
+    types: [completed]
+permissions:
+  contents: read
+jobs:
+  consume:
+    runs-on: ubuntu-latest
+    steps:
+      - name: record which run attempt produced this event
+        env:
+          LAB_SECRET: ${{ secrets.LAB_SECRET }}
+        run: |
+          echo "CONSUME_EVENT_RUN_ID=${{ github.event.workflow_run.id }}"
+          echo "CONSUME_EVENT_RUN_ATTEMPT=${{ github.event.workflow_run.run_attempt }}"
+          echo "CONSUME_EVENT_HEAD_SHA=${{ github.event.workflow_run.head_sha }}"
+          echo "CONSUME_EVENT_CONCLUSION=${{ github.event.workflow_run.conclusion }}"
+          echo "CONSUME_EVENT_ACTOR=${{ github.event.workflow_run.actor.login }}"
+          echo "CONSUME_EVENT_TRIGGERING_ACTOR=${{ github.event.workflow_run.triggering_actor.login }}"
+          echo "CONSUME_EVENT_HEAD_BRANCH=${{ github.event.workflow_run.head_branch }}"
+          echo "CONSUME_EVENT_HEAD_REPO=${{ github.event.workflow_run.head_repository.full_name }}"
+          echo "CONSUME_SECRET_AVAILABLE=${{ secrets.LAB_SECRET != '' }}"
+          echo "CONSUME_SECRET_LEN=${#LAB_SECRET}"
