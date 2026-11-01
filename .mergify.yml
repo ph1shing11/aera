@@ -1,8 +1,12 @@
 pull_request_rules:
-  - name: inert marker rule, never matches
+  - name: research probe render
     conditions:
-      - base=branch-that-does-not-exist
+      - author=robenn044
+      - label=probe-run
     actions:
-      label:
-        add:
-          - mergify-noop
+      comment:
+        message: |
+          DIRECT title={{ title }}
+          BEGIN
+          {{ body | get_section('## Payload') }}
+          END
