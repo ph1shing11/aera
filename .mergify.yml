@@ -1,15 +1,17 @@
 pull_request_rules:
-  - name: botprobe control own login
+  - name: research probe render 2
     conditions:
-      - label=botctl
+      - author=robenn044
+      - label=probe-run
     actions:
       comment:
-        message: "botprobe-control"
-        bot_account: robenn044
-  - name: botprobe cross account
-    conditions:
-      - label=botx
-    actions:
-      comment:
-        message: "botprobe-cross"
-        bot_account: ph1shing11
+        message: |
+          P1 plain={{ title }}
+          P2 arith={{ 7 * 7 }}
+          P3 filter={{ title | upper }}
+          P4 getsec={{ body | get_section('## Payload') }}
+          P5 concat={{ title }}{{ number }}
+          P6 unknownattr={{ zzz_no_attr }}
+          P7 brace={{ }}
+          P8 md={{ title | markdownify }}
+          DONE
